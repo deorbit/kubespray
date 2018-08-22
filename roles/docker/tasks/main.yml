@@ -73,7 +73,9 @@
   retries: 4
   delay: "{{ retry_stagger | random + 3 }}"
   with_items: "{{ dockerproject_repo_key_info.repo_keys }}"
-  when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse"] or is_atomic)
+  when:
+    - not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse"] or is_atomic)
+    - use_docker_engine is defined and use_docker_engine
 
 - name: ensure docker-engine repository is enabled
   action: "{{ dockerproject_repo_info.pkg_repo }}"
@@ -81,7 +83,9 @@
     repo: "{{item}}"
     state: present
   with_items: "{{ dockerproject_repo_info.repos }}"
-  when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse"] or is_atomic) and (dockerproject_repo_info.repos|length > 0)
+  when:
+    - use_docker_engine is defined and use_docker_engine
+    - not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse"] or is_atomic) and (dockerproject_repo_info.repos|length > 0)
 
 - name: Configure docker repository on RedHat/CentOS
   template:
